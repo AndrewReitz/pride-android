@@ -30,9 +30,7 @@ class DefaultEventsLoader @Inject constructor(
                 .singleOrError()
                 .map { it.plus(updateDuration) }
                 .filter { it.isAfter(Instant.now(clock)) }
-                .flatMap { eventsFromDisk }
-                .onErrorResumeNext(eventsFromNetwork.toMaybe())
-                .switchIfEmpty(eventsFromNetwork.onErrorResumeNext(eventsFromDisk.toSingle()).toMaybe())
+                .flatMap { eventsFromNetwork.toMaybe() }
                 .toObservable()
                 .flatMapIterable { it }
                 .map { it.toEvent() }
@@ -47,13 +45,11 @@ class DefaultEventsLoader @Inject constructor(
                 .toList()
                 .subscribeOnIoScheduler()
 
-    private val eventsFromDisk get() = parse.eventsFromDisk.filter { it.isNotEmpty() }
 
     private val eventsFromNetwork get() = parse.eventsFromNetwork
-            .flatMap { parse.pinAll(it).toSingleDefault(it) }
             .doOnSuccess { lastUpdated.set(Instant.now(clock)) }
 
-    override fun getEvent(objectId: String): Single<Event> = parse.getEventFromDisk(objectId)
-            .onErrorResumeNext(parse.getEventFromNetwork(objectId))
+    override fun getEvent(objectId: String): Single<Event> =
+        parse.getEventFromNetwork(objectId)
             .subscribeOnIoScheduler()
 }

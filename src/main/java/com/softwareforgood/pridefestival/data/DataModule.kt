@@ -2,8 +2,11 @@ package com.softwareforgood.pridefestival.data
 
 import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import com.f2prateek.rx.preferences2.Preference
 import com.f2prateek.rx.preferences2.RxSharedPreferences
+import com.softwareforgood.pridefestival.data.room.PrideDao
+import com.softwareforgood.pridefestival.data.room.PrideDatabase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -104,5 +107,17 @@ import javax.inject.Qualifier
                 hoard.createDepositor<Set<String>>("vendor",
                         Types.newParameterizedType(Set::class.java, String::class.java)
                 )
+
+        @Provides
+        @Reusable
+        fun provideRoom(app: Application): PrideDatabase = Room.databaseBuilder(
+            app,
+            PrideDatabase::class.java,
+            "pridedb"
+        ).build()
+
+        @Provides
+        @Reusable
+        fun providePrideDao(prideDatabase: PrideDatabase): PrideDao = prideDatabase.prideDao()
     }
 }

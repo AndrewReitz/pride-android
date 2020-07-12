@@ -30,9 +30,7 @@ class DefaultVendorLoader @Inject constructor(
                 .singleOrError()
                 .map { it.plus(updateDuration) }
                 .filter { it.isAfter(Instant.now(clock)) }
-                .flatMap { vendorsFromDisk }
-                .onErrorResumeNext(vendorsFromNetwork.toMaybe())
-                .switchIfEmpty(vendorsFromNetwork.onErrorResumeNext(vendorsFromDisk.toSingle()).toMaybe())
+                .flatMap { vendorsFromNetwork.toMaybe() }
                 .toObservable()
                 .flatMapIterable { it }
                 .map { it.toVendor() }
@@ -47,13 +45,9 @@ class DefaultVendorLoader @Inject constructor(
                 .toList()
                 .subscribeOnIoScheduler()
 
-    private val vendorsFromDisk get() = parse.vendorsFromDisk.filter { it.isNotEmpty() }
-
     private val vendorsFromNetwork get() = parse.vendorsFromNetwork
-            .flatMap { parse.pinAll(it).toSingleDefault(it) }
             .doOnSuccess { lastUpdated.set(Instant.now(clock)) }
 
-    override fun getVendor(objectId: String) = parse.getVendorFromDisk(objectId)
-            .onErrorResumeNext(parse.getVendorFromNetwork(objectId))
+    override fun getVendor(objectId: String) = parse.getVendorFromNetwork(objectId)
             .subscribeOnIoScheduler()
 }

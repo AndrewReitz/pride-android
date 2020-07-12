@@ -1,15 +1,22 @@
 package com.softwareforgood.pridefestival.data.model
 
 import androidx.annotation.ColorRes
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import com.parse.ParseFile
 import com.parse.ParseGeoPoint
 import com.softwareforgood.pridefestival.R
+import com.softwareforgood.pridefestival.data.room.RoomDataConverter
 import java.util.Locale
 
 /**
  * Matches the Vendor Parse Data Table
  */
+@Entity
+@TypeConverters(RoomDataConverter::class)
 data class Vendor(
+    @PrimaryKey
     override val objectId: String,
     val locationName: String?,
     val showInParadeList: Boolean,
@@ -21,7 +28,8 @@ data class Vendor(
     val vendorType: VendorType,
     val logo: ParseFile?,
     val isSponsor: Boolean,
-    val sectionColor: VendorColor
+    val sectionColor: VendorColor,
+    val favorite: Boolean = false
 ) : Mappable, HasParseId, HasGeoLocation
 
 enum class VendorType(val parseText: String) {

@@ -10,18 +10,25 @@ import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.FontRequestEmojiCompatConfig
 import io.reactivex.disposables.Disposables
 import io.reactivex.plugins.RxJavaPlugins
+import org.threeten.bp.ZoneId
 import timber.log.Timber
 
 class PrideApp : Application(), HasComponent<PrideAppComponent> {
+
+    companion object{
+        /** Default zone for the app because we are in Minneapolis. */
+        val CENTRAL_TIMEZONE: ZoneId by lazy { ZoneId.of(ZoneId.SHORT_IDS["CST"]) }
+    }
+
     private lateinit var _component: PrideAppComponent
     override val component: PrideAppComponent by lazy { _component }
-
-    private var disposable = Disposables.empty()
 
     override fun onCreate() {
         super.onCreate()
 
         if (ProcessPhoenix.isPhoenixProcess(this)) return
+
+        AndroidThreeTen.init(this)
 
         _component = DaggerPrideAppComponent.builder()
                 .application(this)
@@ -29,15 +36,9 @@ class PrideApp : Application(), HasComponent<PrideAppComponent> {
 
         component.initialize()
 
-        // handle any exceptions that may happen after onError was called
-        RxJavaPlugins.setErrorHandler { throwable ->
-            Timber.e(throwable, "Unhandled exception")
-        }
-
-        AndroidThreeTen.init(this)
         with(component) {
-            firstRunCachingService.cacheParseObjects()
             Parse.initialize(parseConfig)
+            firstRunCachingService.cacheParseObjects()
         }
 
         val fontRequest = FontRequest(
@@ -49,10 +50,5 @@ class PrideApp : Application(), HasComponent<PrideAppComponent> {
 
         val config = FontRequestEmojiCompatConfig(this, fontRequest)
         EmojiCompat.init(config)
-    }
-
-    override fun onTerminate() {
-        super.onTerminate()
-        disposable.dispose()
     }
 }

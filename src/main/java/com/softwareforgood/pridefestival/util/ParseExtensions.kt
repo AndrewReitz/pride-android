@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.parse.ParseFile
 import com.parse.ParseGeoPoint
 import com.parse.ParseObject
+import com.softwareforgood.pridefestival.PrideApp.Companion.CENTRAL_TIMEZONE
 import com.softwareforgood.pridefestival.data.model.Event
 import com.softwareforgood.pridefestival.data.model.EventType
 import com.softwareforgood.pridefestival.data.model.ParadeEvent
@@ -12,15 +13,15 @@ import com.softwareforgood.pridefestival.data.model.VendorType
 import com.softwareforgood.pridefestival.data.model.VendorColor
 import io.reactivex.Single
 import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
+import java.io.File
 
 /**
  * Retrieves a [ZonedDateTime] from parse.
  */
 fun ParseObject.getZonedDateTime(key: String): ZonedDateTime? {
     val time = this.getDate(key)?.time ?: return null
-    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault())
+    return ZonedDateTime.ofInstant(Instant.ofEpochMilli(time), CENTRAL_TIMEZONE)
 }
 
 fun ParseFile.toSingle(): Single<ByteArray> {

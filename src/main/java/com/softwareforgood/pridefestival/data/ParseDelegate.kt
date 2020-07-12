@@ -22,24 +22,11 @@ private const val MAX_LIMIT = 1000
  */
 interface ParseDelegate {
     val eventsFromNetwork: Single<List<ParseObject>>
-    val eventsFromDisk: Single<List<ParseObject>>
-
-    fun getEventFromDisk(objectId: String): Single<Event>
     fun getEventFromNetwork(objectId: String): Single<Event>
-
     val paradeFromNetwork: Single<List<ParseObject>>
-    val paradeFromDisk: Single<List<ParseObject>>
-
     fun getParadeFromNetwork(objectId: String): Single<ParadeEvent>
-    fun getParadeFromDisk(objectId: String): Single<ParadeEvent>
-
     val vendorsFromNetwork: Single<List<ParseObject>>
-    val vendorsFromDisk: Single<List<ParseObject>>
-
     fun getVendorFromNetwork(objectId: String): Single<Vendor>
-    fun getVendorFromDisk(objectId: String): Single<Vendor>
-
-    fun pinAll(objects: List<ParseObject>): Completable
 }
 
 @Reusable
@@ -47,16 +34,6 @@ class DefaultParseDelegate @Inject constructor() : ParseDelegate {
     override val eventsFromNetwork: Single<List<ParseObject>> = Single.fromCallable {
         eventQuery.find()
     }.timeout(3, TimeUnit.SECONDS)
-
-    override val eventsFromDisk: Single<List<ParseObject>> = Single.fromCallable {
-        eventQuery.fromLocalDatastore().find()
-    }
-
-    override fun getEventFromDisk(objectId: String): Single<Event> = Single.fromCallable {
-        eventQuery.fromLocalDatastore()
-                .get(objectId)
-                .toEvent()
-    }
 
     override fun getEventFromNetwork(objectId: String): Single<Event> = Single.fromCallable {
         eventQuery.get(objectId)
@@ -67,40 +44,19 @@ class DefaultParseDelegate @Inject constructor() : ParseDelegate {
         paradeQuery.find()
     }.timeout(3, TimeUnit.SECONDS)
 
-    override val paradeFromDisk: Single<List<ParseObject>> = Single.fromCallable {
-        paradeQuery.fromLocalDatastore().find()
-    }
-
     override fun getParadeFromNetwork(objectId: String): Single<ParadeEvent> = Single.fromCallable {
         paradeQuery.fromLocalDatastore()
                 .get(objectId)
                 .toParadeEvent()
     }.timeout(1, TimeUnit.SECONDS)
 
-    override fun getParadeFromDisk(objectId: String): Single<ParadeEvent> = Single.fromCallable {
-        paradeQuery.get(objectId)
-                .toParadeEvent()
-    }
-
     override val vendorsFromNetwork: Single<List<ParseObject>> = Single.fromCallable {
         vendorQuery.find()
     }.timeout(3, TimeUnit.SECONDS)
 
-    override val vendorsFromDisk: Single<List<ParseObject>> = Single.fromCallable {
-        vendorQuery.fromLocalDatastore().find()
-    }
-
     override fun getVendorFromNetwork(objectId: String): Single<Vendor> = Single.fromCallable {
         vendorQuery.get(objectId).toVendor()
     }.timeout(1, TimeUnit.SECONDS)
-
-    override fun getVendorFromDisk(objectId: String): Single<Vendor> = Single.fromCallable {
-        vendorQuery.fromLocalDatastore().get(objectId).toVendor()
-    }
-
-    override fun pinAll(objects: List<ParseObject>): Completable = Completable.fromAction {
-        ParseObject.pinAll(objects)
-    }
 
     private inline val eventQuery: ParseQuery<ParseObject> get() =
         ParseQuery.getQuery<ParseObject>("Event")

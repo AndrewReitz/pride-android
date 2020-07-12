@@ -40,7 +40,6 @@ object PrideAppModule {
     ): Parse.Configuration = Parse.Configuration.Builder(application)
                 .applicationId("kl37CbvvFZGY1diRa7hbMG6X3ZQGcsKZEQRpNMHA")
                 .server(parseServerUrl)
-                .enableLocalDataStore()
                 .build()
 
     @JvmStatic

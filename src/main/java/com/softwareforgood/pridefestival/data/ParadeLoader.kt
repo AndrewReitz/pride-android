@@ -25,27 +25,22 @@ class DefaultParadeLoader @Inject constructor(
 ) : ParadeLoader {
     override val parades
         get() = lastUpdated.asObservable()
-                .take(1)
-                .singleOrError()
-                .map { it.plus(updateDuration) }
-                .filter { it.isAfter(Instant.now(clock)) }
-                .flatMap { paradeFromDisk }
-                .onErrorResumeNext(paradeFromNetwork.toMaybe())
-                .switchIfEmpty(paradeFromNetwork.onErrorResumeNext(paradeFromDisk.toSingle()).toMaybe())
-                .toObservable()
-                .flatMapIterable { it }
-                .filter { it.getString("name") != null }
-                .map { it.toParadeEvent() }
-                .toList()
-                .subscribeOnIoScheduler()
+            .take(1)
+            .singleOrError()
+            .map { it.plus(updateDuration) }
+            .filter { it.isAfter(Instant.now(clock)) }
+            .flatMap { paradeFromNetwork.toMaybe() }
+            .toObservable()
+            .flatMapIterable { it }
+            .filter { it.getString("name") != null }
+            .map { it.toParadeEvent() }
+            .toList()
+            .subscribeOnIoScheduler()
 
-    private val paradeFromDisk get() = parse.paradeFromDisk.filter { it.isNotEmpty() }
-
-    private val paradeFromNetwork get() = parse.paradeFromNetwork
-            .flatMap { parse.pinAll(it).toSingleDefault(it) }
+    private val paradeFromNetwork
+        get() = parse.paradeFromNetwork
             .doOnSuccess { lastUpdated.set(Instant.now(clock)) }
 
-    override fun getParade(objectId: String) = parse.getParadeFromDisk(objectId)
-            .onErrorResumeNext(parse.getParadeFromNetwork(objectId))
-            .subscribeOnIoScheduler()
+    override fun getParade(objectId: String) = parse.getParadeFromNetwork(objectId)
+        .subscribeOnIoScheduler()
 }
