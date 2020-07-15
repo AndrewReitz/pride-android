@@ -9,7 +9,7 @@ import com.softwareforgood.pridefestival.data.model.Vendor
 interface PrideDao {
     @Insert fun insertEvents(events: List<Event>)
     @Insert fun insertParadeEvent(paradeEvent: List<ParadeEvent>)
-    @Insert fun insertVendor(vendor: List<Vendor>)
+    @Insert fun insertVendors(vendor: List<Vendor>)
 
     @Query("SELECT * FROM EVENT") suspend fun events(): List<Event>
     @Query("SELECT * FROM PARADEEVENT") suspend fun paradeEvents(): List<ParadeEvent>

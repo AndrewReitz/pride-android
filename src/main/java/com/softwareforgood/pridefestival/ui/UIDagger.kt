@@ -31,6 +31,7 @@ interface ActivityComponent {
     val infoComponentBuilder: InfoComponent.Builder
 
     fun inject(activity: MainActivity)
+    fun inject(activity: FirstLoadActivity)
     fun inject(deepLinkActivity: DeepLinkActivity)
 
     @Subcomponent.Builder

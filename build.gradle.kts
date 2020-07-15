@@ -7,6 +7,7 @@ plugins {
     id("gradle-versions")
     id("signing-config")
     id("sentry-io")
+    id("kotlin-android")
 }
 
 repositories {

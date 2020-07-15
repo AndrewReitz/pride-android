@@ -33,11 +33,11 @@ class RoomDataConverter {
     fun fromEventType(data: EventType): String = data.parseText
 
     @TypeConverter
-    fun toParseFile(data: ByteArray): ParseFile =
-        ParseFile(data)
+    fun toParseFile(data: ByteArray?): ParseFile? =
+        if (data == null) null else ParseFile(data)
 
     @TypeConverter
-    fun fromParseFile(data: ParseFile): ByteArray = data.data
+    fun fromParseFile(data: ParseFile?): ByteArray? = data?.data
 
     @TypeConverter
     fun toZonedDateTime(data: Long): ZonedDateTime {
@@ -53,13 +53,15 @@ class RoomDataConverter {
     fun fromZonedDateTime(data: ZonedDateTime): Long = data.toInstant().toEpochMilli()
 
     @TypeConverter
-    fun toParseGeoPoint(data: String): ParseGeoPoint {
+    fun toParseGeoPoint(data: String?): ParseGeoPoint? {
+        if (data == null) return null
         val (lat, long) = data.split(",")
         return ParseGeoPoint(lat.toDouble(), long.toDouble())
     }
 
     @TypeConverter
-    fun fromParseGeoPoint(data: ParseGeoPoint): String {
+    fun fromParseGeoPoint(data: ParseGeoPoint?): String? {
+        if (data == null) return null
         return "${data.latitude},${data.longitude}"
     }
 }
